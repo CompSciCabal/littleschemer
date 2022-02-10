@@ -235,7 +235,7 @@
 (define rember
   (lambda (s l)
     (cond
-      [(null? l) (quote ())]
+      [(null? l) empty]
       [(equal? (car l) s) (cdr l)]
       [else (cons (car l) (rember s (cdr l)))])))
 
@@ -259,7 +259,7 @@
 
 (define sero? (lambda (n) (null? n)))
 
-(define edd1 (lambda (n) (cons (quote ()) n)))
+(define edd1 (lambda (n) (cons empty n)))
 
 (define zub1 (lambda (n) (cdr n)))
 
@@ -276,7 +276,7 @@
 (define makeset
   (lambda (lat)
     (cond
-      [(null? lat) (quote ())]
+      [(null? lat) empty]
       [else (cons (car lat) (makeset (multirember (car lat) (cdr lat))))])))
 
 (define subset?
@@ -297,7 +297,7 @@
 (define intersect
   (lambda (set1 set2)
     (cond
-      [(null? set1) (quote ())]
+      [(null? set1) empty]
       [(member? (car set1) set2) (cons (car set1) (intersect (cdr set1) set2))]
       [else (intersect (cdr set1) set2)])))
 
@@ -311,7 +311,7 @@
 (define difference
   (lambda (set1 set2)
     (cond
-      [(null? set1) (quote ())]
+      [(null? set1) empty]
       [(member? (car set1) set2) (difference (cdr set1) set2)]
       [else (cons (car set1) (difference (cdr set1) set2))])))
 
@@ -339,7 +339,7 @@
 (define build
   (lambda (sl s2)
     (cond
-      [else (cons sl (cons s2 (quote ())))])))
+      [else (cons sl (cons s2 empty))])))
 
 (define fun? (lambda (rel) (set? (firsts rel))))
 
@@ -348,7 +348,7 @@
 (define revrel
   (lambda (rel)
     (cond
-      [(null? rel) (quote ())]
+      [(null? rel) empty]
       [else (cons (revpair (car rel)) (revrel (cdr rel)))])))
 
 (define seconds
@@ -369,7 +369,7 @@
   (lambda (test?)
     (lambda (a l)
       (cond
-        [(null? l) (quote ())]
+        [(null? l) empty]
         [(test? (car l) a) (cdr l)]
         [else (cons (car l) ((rember-f test?) a (cdr l)))]))))
 
@@ -377,7 +377,7 @@
   (lambda (test?)
     (lambda (new old l)
       (cond
-        [(null? l) (quote ())]
+        [(null? l) empty]
         [(test? (car l) old) (cons new (cons old (cdr l)))]
         [else (cons (car l) ((insertL-f test?) new old (cdr l)))]))))
 
@@ -385,7 +385,7 @@
   (lambda (test?)
     (lambda (new old l)
       (cond
-        [(null? l) (quote ())]
+        [(null? l) empty]
         [(test? (car l) old) (cons old (cons new (cdr l)))]
         [else (cons (car l) ((insertR-f test?) new old (cdr l)))]))))
 
@@ -397,7 +397,7 @@
   (lambda (seq)
     (lambda (new old l)
       (cond
-        [(null? l) (quote ())]
+        [(null? l) empty]
         [(eq? (car l) old) (seq new old (cdr l))]
         [else (cons (car l) ((insert-g seq) new old (cdr l)))]))))
 
@@ -428,7 +428,7 @@
   (lambda (test?)
     (lambda (a lat)
       (cond
-        [(null? lat) (quote ())]
+        [(null? lat) empty]
         [(test? a (car lat)) ((multirember-f test?) a (cdr lat))]
         [else (cons (car lat) ((multirember-f test?) a (cdr lat)))]))))
 
