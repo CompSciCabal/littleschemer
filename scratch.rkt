@@ -436,6 +436,160 @@
 
 (define eq?-tuna (eq?-c (quote tuna)))
 
+(define rember-f
+  (lambda (test?)
+    (lambda (a l)
+      (cond
+        [(null? l) (quote ())]
+        [(test? (car l) a) (cdr l)]
+        [else (cons (car l) ((rember-f test?) a (cdr l)))]))))
+
+(define insertL*
+  (lambda (new old l)
+    (cond
+      [(null? l) '()]
+      [(atom? (car l))
+       (cond
+         [(eq? (car l) old) (cons new (cons old (insertL* new old (cdr l))))]
+         [else (cons (car l) (insertL* new old (cdr l)))])]
+      [else (cons (insertL* new old (car l)) (insertL* new old (cdr l)))])))
+
+(define insertL
+  (lambda (test?)
+    (lambda (new old lat)
+      (cond
+        [(null? lat) '()]
+        [(test? (car lat) old) (cons new (cons old (cdr lat)))]
+        [else (cons (car lat) ((insertL test?) new old (cdr lat)))]))))
+
+(define insertR
+  (lambda (test?)
+    (lambda (new old lat)
+      (cond
+        [(null? lat) '()]
+        [(test? (car lat) old) (cons old (cons new (cdr lat)))]
+        [else (cons (car lat) ((insertR test?) new old (cdr lat)))]))))
+
+(define seqL (lambda (a b c) (cons a (cons b c))))
+
+(define seqR (lambda (a b c) (cons b (cons a c))))
+
+(define insert-g
+  (lambda (seq)
+    (lambda (new old lat)
+      (cond
+        [(null? lat) '()]
+        [(eq? (car lat) old) (seq new old (cdr lat))]
+        [else (cons (car lat) ((insert-g seq) new old (cdr lat)))]))))
+
+(define seqCarl (lambda (a b c) (cons a c)))
+
+(define atom-to-function
+  (lambda (x)
+    (cond
+      [(eq? x '+) +]
+      [(eq? x '*) *]
+      [else expt])))
+
+(define operator car)
+
+(define value!
+  (lambda (nexp)
+    (cond
+      [(atom? nexp) nexp]
+      [else
+       ((atom-to-function (operator nexp)) (value! (cadr nexp))
+                                           (value! (caddr nexp)))])))
+
+(define multirember-f
+  (lambda (test?)
+    (lambda (a lat)
+      (cond
+        [(null? lat) (quote ())]
+        [(test? (car lat) a) ((multirember-f test?) a (cdr lat))]
+        [else (cons (car lat) ((multirember-f test?) a (cdr lat)))]))))
+
+(define multiremberT
+  (lambda (f lat)
+    (cond
+      [(null? lat) '()]
+      [(f (car lat)) (multiremberT f (cdr lat))]
+      [else (cons (car lat) (multiremberT f (cdr lat)))])))
+
+(define multiinsertL
+  (lambda (new old lat)
+    (cond
+      [(null? lat) (quote ())]
+      [(eq? (car lat) old)
+       (cons new (cons old (multiinsertL new old (cdr lat))))]
+      [else (cons (car lat) (multiinsertL new old (cdr lat)))])))
+
+(define multiinsertR
+  (lambda (new old lat)
+    (cond
+      [(null? lat) (quote ())]
+      [(eq? (car lat) old)
+       (cons old (cons new (multiinsertR new old (cdr lat))))]
+      [else (cons (car lat) (multiinsertR new old (cdr lat)))])))
+
+(define multiinsertLR
+  (lambda (new oldL oldR lat)
+    (multiinsertL new oldL (multiinsertR new oldR lat))))
+
+(define mlr
+  (lambda (new oldL oldR lat col)
+    (cond
+      [(null? lat) (col '() 0 0)]
+      [(eq? oldL (car lat))
+       (mlr new
+            oldL
+            oldR
+            (cdr lat)
+            (lambda (newlat L R)
+              (col (cons new (cons oldL newlat)) (add1 L) R)))]
+      [(eq? oldR (car lat))
+       (mlr new
+            oldL
+            oldR
+            (cdr lat)
+            (lambda (newlat L R)
+              (col (cons oldR (cons new newlat)) L (add1 R))))]
+      [else
+       (mlr new
+            oldL
+            oldR
+            (cdr lat)
+            (lambda (newlat L R)
+              (col (cons (car lat) newlat) L R)))]))) ; ; Empty result.
+
+(mlr 'x 1 2 '(3 2 1 4) (lambda (a b c) (list b c a))) ; '(1 1 (3 2 x x 1 4))
+
+(define banana* (lambda (l) 'banana))
+
+(define evens-only*
+  (lambda (l)
+    (cond
+      [(null? l) empty]
+      [(and (atom? (car l)) (even? (car l)))
+       (cons (car l) (evens-only* (cdr l)))]
+      [(atom? (car l)) (evens-only* (cdr l))]
+      [else (cons (evens-only* (car l)) (evens-only* (cdr l)))])))
+
+(evens-only* '(1 2 (2 5 3 4 (2 2 2 3) (0 2 1) (())) 7))
+
+; Chapter 9
+
+(define looking (lambda (a lat) (keep-looking a (pick 1 lat) lat)))
+
+(define keep-looking
+  (lambda (a i lat)
+    (cond
+      [(equal? a i) #t]
+      [(number? i) (keep-looking a (pick i lat) lat)]
+      [else #f])))
+
+(looking 'cookies '(2 4 cookies 7))
+
 ; etc
 
 (define filter
