@@ -588,7 +588,76 @@
       [(number? i) (keep-looking a (pick i lat) lat)]
       [else #f])))
 
+(define keep-looking
+  (lambda (a sorn lat)
+    (cond
+      [(number? sorn) (keep-looking a (pick sorn lat) lat)]
+      [else (eq? sorn a)])))
+
 (looking 'cookies '(2 4 cookies 7))
+
+(define shift
+  (lambda (l)
+    (cond
+      [(atom? (car l)) l]
+      [else
+       (shift (cons (car (car l))
+                    (cons (cons (pick 2 (car l)) (cdr l)) '())))])))
+
+(define shift2
+  (lambda (l)
+    (cond
+      [(atom? (first l)) l]
+      [else
+       (shift2 (build (first (first l))
+                      (shift2 (build (second (first l)) (second l)))))])))
+
+(define countargs
+  (lambda (pora)
+    (cond
+      [(atom? pora) 1]
+      [else (+ (countargs (first pora)) (countargs (second pora)))])))
+
+(define will-stop?
+  (lambda (f)
+    (begin
+      (f '())
+      #t)))
+
+(define eternity (lambda (x) (eternity c))) ; ; Empty result.
+
+((lambda (length)
+   (lambda (l)
+     (cond
+       [(null? l) 0]
+       [else (add1 (length (cdr l)))])))
+ eternity)
+
+(((lambda (length)
+    (lambda (l)
+      (cond
+        [(null? l) 0]
+        [else (add1 (length (cdr l)))])))
+  ((lambda (length)
+     (lambda (l)
+       (cond
+         [(null? l) 0]
+         [else (add1 (length (cdr l)))])))
+   ((lambda (length)
+      (lambda (l)
+        (cond
+          [(null? l) 0]
+          [else (add1 (length (cdr l)))])))
+    eternity)))
+ '(1 2))
+
+(((lambda (mk-length) (mk-length mk-length))
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        [(null? l) 0]
+        [else (add1 (mk-length (cdr l)))]))))
+ '(a))
 
 ; etc
 
