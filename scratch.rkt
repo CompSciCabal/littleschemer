@@ -436,62 +436,62 @@
 
 (define eq?-tuna (eq?-c (quote tuna)))
 
-(define rember-f
-  (lambda (test?)
-    (lambda (a l)
-      (cond
-        [(null? l) (quote ())]
-        [(test? (car l) a) (cdr l)]
-        [else (cons (car l) ((rember-f test?) a (cdr l)))]))))
+;(define rember-f
+;  (lambda (test?)
+;    (lambda (a l)
+;      (cond
+;        [(null? l) (quote ())]
+;        [(test? (car l) a) (cdr l)]
+;        [else (cons (car l) ((rember-f test?) a (cdr l)))]))))
 
-(define insertL*
-  (lambda (new old l)
-    (cond
-      [(null? l) '()]
-      [(atom? (car l))
-       (cond
-         [(eq? (car l) old) (cons new (cons old (insertL* new old (cdr l))))]
-         [else (cons (car l) (insertL* new old (cdr l)))])]
-      [else (cons (insertL* new old (car l)) (insertL* new old (cdr l)))])))
+;(define insertL*
+;  (lambda (new old l)
+;    (cond
+;      [(null? l) '()]
+;      [(atom? (car l))
+;       (cond
+;         [(eq? (car l) old) (cons new (cons old (insertL* new old (cdr l))))]
+;         [else (cons (car l) (insertL* new old (cdr l)))])]
+;      [else (cons (insertL* new old (car l)) (insertL* new old (cdr l)))])))
 
-(define insertL
-  (lambda (test?)
-    (lambda (new old lat)
-      (cond
-        [(null? lat) '()]
-        [(test? (car lat) old) (cons new (cons old (cdr lat)))]
-        [else (cons (car lat) ((insertL test?) new old (cdr lat)))]))))
+;(define insertL
+;  (lambda (test?)
+;    (lambda (new old lat)
+;      (cond
+;        [(null? lat) '()]
+;        [(test? (car lat) old) (cons new (cons old (cdr lat)))]
+;        [else (cons (car lat) ((insertL test?) new old (cdr lat)))]))))
 
-(define insertR
-  (lambda (test?)
-    (lambda (new old lat)
-      (cond
-        [(null? lat) '()]
-        [(test? (car lat) old) (cons old (cons new (cdr lat)))]
-        [else (cons (car lat) ((insertR test?) new old (cdr lat)))]))))
+;(define insertR
+;  (lambda (test?)
+;    (lambda (new old lat)
+;      (cond
+;        [(null? lat) '()]
+;        [(test? (car lat) old) (cons old (cons new (cdr lat)))]
+;        [else (cons (car lat) ((insertR test?) new old (cdr lat)))]))))
 
-(define seqL (lambda (a b c) (cons a (cons b c))))
+; (define seqL (lambda (a b c) (cons a (cons b c))))
 
-(define seqR (lambda (a b c) (cons b (cons a c))))
+; (define seqR (lambda (a b c) (cons b (cons a c))))
 
-(define insert-g
-  (lambda (seq)
-    (lambda (new old lat)
-      (cond
-        [(null? lat) '()]
-        [(eq? (car lat) old) (seq new old (cdr lat))]
-        [else (cons (car lat) ((insert-g seq) new old (cdr lat)))]))))
+;(define insert-g
+;  (lambda (seq)
+;    (lambda (new old lat)
+;      (cond
+;        [(null? lat) '()]
+;        [(eq? (car lat) old) (seq new old (cdr lat))]
+;        [else (cons (car lat) ((insert-g seq) new old (cdr lat)))]))))
 
 (define seqCarl (lambda (a b c) (cons a c)))
 
-(define atom-to-function
-  (lambda (x)
-    (cond
-      [(eq? x '+) +]
-      [(eq? x '*) *]
-      [else expt])))
+;(define atom-to-function
+;  (lambda (x)
+;    (cond
+;      [(eq? x '+) +]
+;      [(eq? x '*) *]
+;      [else expt])))
 
-(define operator car)
+; (define operator car)
 
 (define value!
   (lambda (nexp)
@@ -501,13 +501,13 @@
        ((atom-to-function (operator nexp)) (value! (cadr nexp))
                                            (value! (caddr nexp)))])))
 
-(define multirember-f
-  (lambda (test?)
-    (lambda (a lat)
-      (cond
-        [(null? lat) (quote ())]
-        [(test? (car lat) a) ((multirember-f test?) a (cdr lat))]
-        [else (cons (car lat) ((multirember-f test?) a (cdr lat)))]))))
+;(define multirember-f
+;  (lambda (test?)
+;    (lambda (a lat)
+;      (cond
+;        [(null? lat) (quote ())]
+;        [(test? (car lat) a) ((multirember-f test?) a (cdr lat))]
+;        [else (cons (car lat) ((multirember-f test?) a (cdr lat)))]))))
 
 (define multiremberT
   (lambda (f lat)
@@ -516,21 +516,21 @@
       [(f (car lat)) (multiremberT f (cdr lat))]
       [else (cons (car lat) (multiremberT f (cdr lat)))])))
 
-(define multiinsertL
-  (lambda (new old lat)
-    (cond
-      [(null? lat) (quote ())]
-      [(eq? (car lat) old)
-       (cons new (cons old (multiinsertL new old (cdr lat))))]
-      [else (cons (car lat) (multiinsertL new old (cdr lat)))])))
+;(define multiinsertL
+;  (lambda (new old lat)
+;    (cond
+;      [(null? lat) (quote ())]
+;      [(eq? (car lat) old)
+;       (cons new (cons old (multiinsertL new old (cdr lat))))]
+;      [else (cons (car lat) (multiinsertL new old (cdr lat)))])))
 
-(define multiinsertR
-  (lambda (new old lat)
-    (cond
-      [(null? lat) (quote ())]
-      [(eq? (car lat) old)
-       (cons old (cons new (multiinsertR new old (cdr lat))))]
-      [else (cons (car lat) (multiinsertR new old (cdr lat)))])))
+;(define multiinsertR
+;  (lambda (new old lat)
+;    (cond
+;      [(null? lat) (quote ())]
+;      [(eq? (car lat) old)
+;       (cons old (cons new (multiinsertR new old (cdr lat))))]
+;      [else (cons (car lat) (multiinsertR new old (cdr lat)))])))
 
 (define multiinsertLR
   (lambda (new oldL oldR lat)
@@ -562,7 +562,7 @@
             (lambda (newlat L R)
               (col (cons (car lat) newlat) L R)))]))) ; ; Empty result.
 
-(mlr 'x 1 2 '(3 2 1 4) (lambda (a b c) (list b c a))) ; '(1 1 (3 2 x x 1 4))
+; (mlr 'x 1 2 '(3 2 1 4) (lambda (a b c) (list b c a))) ; '(1 1 (3 2 x x 1 4))
 
 (define banana* (lambda (l) 'banana))
 
@@ -575,7 +575,7 @@
       [(atom? (car l)) (evens-only* (cdr l))]
       [else (cons (evens-only* (car l)) (evens-only* (cdr l)))])))
 
-(evens-only* '(1 2 (2 5 3 4 (2 2 2 3) (0 2 1) (())) 7))
+; (evens-only* '(1 2 (2 5 3 4 (2 2 2 3) (0 2 1) (())) 7))
 
 ; Chapter 9
 
@@ -588,13 +588,13 @@
       [(number? i) (keep-looking a (pick i lat) lat)]
       [else #f])))
 
-(define keep-looking
+(define keep-looking2
   (lambda (a sorn lat)
     (cond
-      [(number? sorn) (keep-looking a (pick sorn lat) lat)]
+      [(number? sorn) (keep-looking2 a (pick sorn lat) lat)]
       [else (eq? sorn a)])))
 
-(looking 'cookies '(2 4 cookies 7))
+; (looking 'cookies '(2 4 cookies 7))
 
 (define shift
   (lambda (l)
@@ -624,40 +624,40 @@
       (f '())
       #t)))
 
-(define eternity (lambda (x) (eternity c))) ; ; Empty result.
+(define eternity (lambda (x) (eternity x))) ; ; Empty result.
 
-((lambda (length)
-   (lambda (l)
-     (cond
-       [(null? l) 0]
-       [else (add1 (length (cdr l)))])))
- eternity)
+;((lambda (length)
+;   (lambda (l)
+;     (cond
+;       [(null? l) 0]
+;       [else (add1 (length (cdr l)))])))
+; eternity)
+;
+;(((lambda (length)
+;    (lambda (l)
+;      (cond
+;        [(null? l) 0]
+;        [else (add1 (length (cdr l)))])))
+;  ((lambda (length)
+;     (lambda (l)
+;       (cond
+;         [(null? l) 0]
+;         [else (add1 (length (cdr l)))])))
+;   ((lambda (length)
+;      (lambda (l)
+;        (cond
+;          [(null? l) 0]
+;          [else (add1 (length (cdr l)))])))
+;    eternity)))
+; '(1 2))
 
-(((lambda (length)
-    (lambda (l)
-      (cond
-        [(null? l) 0]
-        [else (add1 (length (cdr l)))])))
-  ((lambda (length)
-     (lambda (l)
-       (cond
-         [(null? l) 0]
-         [else (add1 (length (cdr l)))])))
-   ((lambda (length)
-      (lambda (l)
-        (cond
-          [(null? l) 0]
-          [else (add1 (length (cdr l)))])))
-    eternity)))
- '(1 2))
-
-(((lambda (mk-length) (mk-length mk-length))
-  (lambda (mk-length)
-    (lambda (l)
-      (cond
-        [(null? l) 0]
-        [else (add1 (mk-length (cdr l)))]))))
- '(a))
+;(((lambda (mk-length) (mk-length mk-length))
+;  (lambda (mk-length)
+;    (lambda (l)
+;      (cond
+;        [(null? l) 0]
+;        [else (add1 (mk-length (cdr l)))]))))
+; '(a))
 
 ; etc
 
