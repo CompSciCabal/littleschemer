@@ -659,6 +659,7 @@
 ;        [else (add1 (mk-length (cdr l)))]))))
 ; '(a))
 
+
 ; etc
 
 (define filter
@@ -671,3 +672,52 @@
 (define nnot (lambda (f) (lambda (x) (not (f x)))))
 
 (define comp (lambda (f g) (lambda (x) (f (g x)))))
+
+
+
+(((lambda (mk-length)
+    (mk-length mk-length))
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else (add1
+               ((mk-length mk-length)
+                (cdr l)))))))) '(a b c)) 
+
+(((lambda (mk-length)
+    (mk-length mk-length))
+  (lambda (mk-length)
+    ((lambda (length)
+       (lambda (l)
+         (cond
+           ((null? l) 0)
+           (else (add1
+                  (length (cdr l)))))))
+     (lambda (x)
+       ((mk-length mk-length) x)))))
+ '(a b c))
+
+(define YY
+  (lambda (g)
+    ((lambda (f) (f f))
+     (lambda (f)
+       (g (lambda (x)
+            ((f f) x)))))))
+
+(define Y
+  (lambda (f)
+    (lambda (x) (f (x x))
+      (lambda (x) (f (x x))))))
+      
+(((lambda (g)
+    ((lambda (f) (f f))
+     (lambda (f)
+       (g (lambda (x)
+            ((f f) x))))))
+  (lambda (length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else (add1
+               (length (cdr l)))))))) '(1 2 3))
