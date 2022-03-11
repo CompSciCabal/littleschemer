@@ -698,14 +698,14 @@
        ((mk-length mk-length) x)))))
  '(a b c))
 
-(define YY
+(define Y
   (lambda (g)
     ((lambda (f) (f f))
      (lambda (f)
        (g (lambda (x)
             ((f f) x)))))))
 
-(define Y
+(define YY
   (lambda (f)
     (lambda (x) (f (x x))
       (lambda (x) (f (x x))))))
