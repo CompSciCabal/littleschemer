@@ -660,8 +660,6 @@
 ; '(a))
 
 
-; etc
-
 (define filter
   (lambda (f lat)
     (cond
@@ -674,50 +672,93 @@
 (define comp (lambda (f g) (lambda (x) (f (g x)))))
 
 
-
-(((lambda (mk-length)
-    (mk-length mk-length))
+(((lambda (mk-length) (mk-length mk-length))
   (lambda (mk-length)
     (lambda (l)
       (cond
-        ((null? l) 0)
-        (else (add1
-               ((mk-length mk-length)
-                (cdr l)))))))) '(a b c)) 
+        [(null? l) 0]
+        [else (add1 ((mk-length mk-length) (cdr l)))]))))
+ '(a b c))
 
-(((lambda (mk-length)
-    (mk-length mk-length))
+(((lambda (mk-length) (mk-length mk-length))
   (lambda (mk-length)
     ((lambda (length)
        (lambda (l)
          (cond
-           ((null? l) 0)
-           (else (add1
-                  (length (cdr l)))))))
-     (lambda (x)
-       ((mk-length mk-length) x)))))
+           [(null? l) 0]
+           [else (add1 (length (cdr l)))])))
+     (lambda (x) ((mk-length mk-length) x)))))
  '(a b c))
 
 (define Y
-  (lambda (g)
-    ((lambda (f) (f f))
-     (lambda (f)
-       (g (lambda (x)
-            ((f f) x)))))))
+  (lambda (g) ((lambda (f) (f f)) (lambda (f) (g (lambda (x) ((f f) x)))))))
 
-(define YY
-  (lambda (f)
-    ((lambda (x) (f (x x)))
-      (lambda (x) (f (x x))))))
-      
-(((lambda (g)
-    ((lambda (f) (f f))
-     (lambda (f)
-       (g (lambda (x)
-            ((f f) x))))))
+(define YY (lambda (f) ((lambda (x) (f (x x))) (lambda (x) (f (x x))))))
+
+(((lambda (g) ((lambda (f) (f f)) (lambda (f) (g (lambda (x) ((f f) x))))))
   (lambda (length)
     (lambda (l)
       (cond
-        ((null? l) 0)
-        (else (add1
-               (length (cdr l)))))))) '(1 2 3))
+        [(null? l) 0]
+        [else (add1 (length (cdr l)))]))))
+ '(1 2 3))
+
+
+; Chapter 10
+
+'((a b c) (1 2 1))
+
+(define new-entry build)
+
+(define lookup-in-entry
+  (lambda (name entry entry-f)
+    (lookup-in-entry-help name (first entry) (second entry) entry-f)))
+
+(define lookup-in-entry-help
+  (lambda (name names values entry-f)
+    (cond
+      [(null? names) (entry-f name)]
+      [(eq? name (first names)) (first values)]
+      [else (lookup-in-entry-help name (cdr names) (cdr values) entry-f)])))
+
+(lookup-in-entry 'c '((a b c) (1 1 1)) (lambda (x) x))
+
+(define extend-table cons)
+
+(define lookup-in-table
+  (lambda (name table table-f)
+    (cond
+      [(null? table) (table-f name)]
+      [else
+       (lookup-in-entry
+        name
+        (car table)
+        (lambda (name) (lookup-in-table name (cdr table) table-f)))])))
+
+(lookup-in-table 'g '(((a b c) (1 2 3)) ((d e f) (4 5 6))) (lambda (x) x))
+
+(define atom-to-action
+  (lambda (e)
+    (cond
+      [(number? e) *const]
+      [(eq? e #t) *const]
+      [(eq? e #f) *const]
+      [(eq? e (quote cons)) *const]
+      [(eq? e (quote car)) *const]
+      [(eq? e (quote cdr)) *const]
+      [(eq? e (quote null?)) *const]
+      [(eq? e (quote eq?)) *const]
+      [(eq? e (quote atom?)) *const]
+      [(eq? e (quote zero?)) *const]
+      [(eq? e (quote add1)) *const]
+      [(eq? e (quote sub1)) *const]
+      [(eq? e (quote number?)) *const]
+      [else *identifier])))
+
+(define list-to-action
+  (lambda (l)
+    (cond
+      [(eq? (car l) 'quote) *quote]
+      [(eq? (car l) 'lambda) *lambda]
+      [(eq? (car l) 'cond) *cond]
+      [else *application])))
