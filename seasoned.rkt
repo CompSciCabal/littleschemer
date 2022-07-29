@@ -171,44 +171,51 @@
 
 (define rember
   (lambda (a lat)
-    (letrec
-        ((R (lambda (lat)
-              (cond
-                ((null? lat) '())
-                ((eq? a (car lat)) (cdr lat))
-                (else (cons (car lat) (R (cdr lat))))))))
+    (letrec ([R (lambda (lat)
+                  (cond
+                    [(null? lat) '()]
+                    [(eq? a (car lat)) (cdr lat)]
+                    [else (cons (car lat) (R (cdr lat)))]))])
       (R lat))))
 
 (define rember-upto-last
   (lambda (a lat)
-    (letrec
-        ((R (lambda (lat tail)
-              (cond
-                ((null? lat) tail)
-                ((eq? a (car lat)) (R (cdr lat) (cdr lat)))
-                (else (R (cdr lat) tail))))))
+    (letrec ([R (lambda (lat tail)
+                  (cond
+                    [(null? lat) tail]
+                    [(eq? a (car lat)) (R (cdr lat) (cdr lat))]
+                    [else (R (cdr lat) tail)]))])
       (R lat lat))))
 
 (define rember-upto-last-cc
   (lambda (a lat)
     (call-with-current-continuation
      (lambda (skip)
-       (letrec
-           ((R (lambda (lat)
-                 (cond
-                   ((null? lat) '())
-                   ((eq? a (car lat)) (skip (R (cdr lat))))
-                   (else (cons (car lat) (R (cdr lat))))))))
+       (letrec ([R (lambda (lat)
+                     (cond
+                       [(null? lat) '()]
+                       [(eq? a (car lat)) (skip (R (cdr lat)))]
+                       [else (cons (car lat) (R (cdr lat)))]))])
          (R lat))))))
 
 (define leftmost
   (lambda (l)
     (cond
-      ((null? l) '())
-      ((atom? (car l)) (car l))
-      (else
-       (let ((carl (leftmost (car l))))
+      [(null? l) '()]
+      [(atom? (car l)) (car l)]
+      [else
+       (let ([carl (leftmost (car l))])
          (cond
-           ((atom? carl) carl)
-           (else (leftmost (cdr l)))))))))
+           [(atom? carl) carl]
+           [else (leftmost (cdr l))]))])))
 
+(define depth*
+  (lambda (l)
+    (cond
+      [(null? l) 1]
+      [(atom? (car l)) (depth* (cdr l))]
+      [else
+       (let ([a (add1 (depth* (car l)))] [d (depth* (cdr l))])
+         (if (> d a) d a))])))
+
+; BLT comment on page 76
