@@ -215,7 +215,32 @@
       [(null? l) 1]
       [(atom? (car l)) (depth* (cdr l))]
       [else
-       (let ([a (add1 (depth* (car l)))] [d (depth* (cdr l))])
+       (let ([a (add1 (depth* (car l)))]
+             [d (depth* (cdr l))])
          (if (> d a) d a))])))
 
 ; BLT comment on page 76
+
+(define leftmost2
+  (lambda (l)
+    (call-with-current-continuation
+     (lambda (skip)
+       (lm l skip)))))
+
+(define lm
+  (lambda (l out)
+    (cond
+      ((null? l) '())
+      ((atom? (car l)) (out (car l)))
+      (else (let ()
+              (lm (car l) out)
+              (lm (cdr l) out))))))
+
+(define walk
+  (lambda (l out)
+    (or (null? l)
+      (let ()
+        (cond
+          ((atom? (car l)) (out (car l)))
+          (else (walk (car l) out)))
+        (walk (cdr l) out)))))
