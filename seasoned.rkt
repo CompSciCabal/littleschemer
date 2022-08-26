@@ -258,3 +258,60 @@
 
 (call-with-current-continuation
  (lambda (Say) (rm 'noodles '((food) more food) Say))) ; 'no
+
+;;;
+(define x 'skins)
+(define gourmet
+  (lambda (food)
+    (cons food
+          (cons x '()))))
+
+(gourmet 'onion)
+(set! x 'rings)
+(gourmet 'onion)
+
+(define gourmand
+  (lambda (food)
+    (set! x food)
+    (cons food
+          (cons x '()))))
+
+(define dinerR
+  (lambda (food)
+    (set! x food)
+    (cons 'milkshake
+          (cons food '()))))
+
+(define omnivore
+  (let ((x 'minestrone))
+    (lambda (food)
+      (set! x food)
+      (cons food
+            (cons x '())))))
+
+(define gobbler
+  (let ((x 'minestrone))
+    (lambda (food)
+      (set! x food)
+      (cons food
+            (cons x '())))))
+
+(define counter
+  (let ((x 0))
+    (lambda ()
+      (set! x (+ 1 x))
+      x)))
+
+(define notcounter
+  (lambda ()
+    (let ((x 0))
+      (set! x (+ 1 x))
+      x)))
+
+(define chez-nous
+  (lambda (food)
+    (let ((z food))
+      (set! food x)
+      (set! x z))))
+
+; Skordalia!
