@@ -384,9 +384,9 @@
                            (x (car  zc))
                            (y (cadr zc)))
                     (cond
-                      [(> (abs x) 2) 0]
-                      [(> (abs y) 2) 0]
-                      [(eq? n 0) 1]
+                      [(> (abs x) 2) 7]
+                      [(> (abs y) 2) 1]
+                      [(eq? n 0) 0]
                       [else (R zc (- n 1))])))])
          (R '(0 0) 100))))
 
@@ -397,5 +397,6 @@
     (map (lambda (y) (map f (map (lambda (x) (list x y)) xs))) ys)))
                   
 ; (plot mandelbrot (range -1 1 0.2) (range -1 1 0.2))
+; (plot mandelbrot (range -1.5 0.5 0.05) (range -1 1 0.05))
 
 (define newtonsmethod 1)
