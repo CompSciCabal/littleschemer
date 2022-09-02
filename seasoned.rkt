@@ -304,9 +304,9 @@
 
 (define notcounter
   (lambda ()
-    (let ((x 0))
-      (set! x (+ 1 x))
-      x)))
+    (let ((xyz 0))
+      (set! xyz (+ 1 xyz))
+      xyz)))
 
 (define chez-nous
   (lambda (food)
@@ -315,3 +315,87 @@
       (set! x z))))
 
 ; Skordalia!
+
+(define qq 0)
+(define cntr
+    (lambda ()
+      (set! qq (+ 1 qq))
+      qq))
+
+(define argtest
+  (lambda (x)
+    (set! x 5)
+    x))
+
+(define xy ; (x + yi) * (a + bi)
+  (let ((x 1) (y 0))
+    (lambda (a b)
+        (set! x (- (* x a) (* y b)))
+        (set! y (+ (* y a) (* x b)))
+        `(,x ,y))))
+
+(define iterator
+  (lambda (f init)
+    (let ((x init))
+      (lambda ()
+        (set! x (f x))
+        x))))
+
+(define it
+  (lambda (f x n)
+    (cond ((= n 0) '())
+          (else (cons (f x) (it f (f x) (- n 1)))))))
+
+(define unpair
+  (lambda (f)
+    (lambda (z)
+      (f (car z) (cadr z)))))
+
+; z -> z^2 + c
+
+(define c* ; (x + yi) * (a + bi)
+  (lambda (z1 z2)
+    (let ((x (car  z1))
+          (y (cadr z1))
+          (a (car  z2))
+          (b (cadr z2)))
+      (list (- (* x a) (* y b)) (+ (* y a) (* x b))))))
+
+(define c+ ; (x + yi) + (a + bi)
+  (lambda (z1 z2)
+    (let ((x (car  z1))
+          (y (cadr z1))
+          (a (car  z2))
+          (b (cadr z2)))
+      (list (+ x a) (+ y b)))))
+
+(define range
+  (lambda (start end step)
+    (letrec ([R (lambda (x)
+                  (cond ((> x end) '())
+                        (else (cons x (R (+ x step))))))])
+      (R start))))
+
+(define mandelbrot ; does it get larger than 2?
+  (lambda (c)
+    (letrec ([R (lambda (z n)
+                  (letrec ((z2 (c* z z))
+                           (zc (c+ z2 c))
+                           (x (car  zc))
+                           (y (cadr zc)))
+                    (cond
+                      [(> (abs x) 2) 0]
+                      [(> (abs y) 2) 0]
+                      [(eq? n 0) 1]
+                      [else (R zc (- n 1))])))])
+         (R '(0 0) 100))))
+
+
+
+(define plot
+  (lambda (f xs ys)
+    (map (lambda (y) (map f (map (lambda (x) (list x y)) xs))) ys)))
+                  
+; (plot mandelbrot (range -1 1 0.2) (range -1 1 0.2))
+
+(define newtonsmethod 1)
