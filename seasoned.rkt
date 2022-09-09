@@ -304,9 +304,9 @@
 
 (define notcounter
   (lambda ()
-    (let ((xyz 0))
-      (set! xyz (+ 1 xyz))
-      xyz)))
+    (let ((x 0))
+      (set! x (+ 1 x))
+      x)))
 
 (define chez-nous
   (lambda (food)
@@ -400,3 +400,68 @@
 ; (plot mandelbrot (range -1.5 0.5 0.05) (range -1 1 0.05))
 
 (define newtonsmethod 1)
+
+;; Chapter 16
+
+(define sweet-tooth
+  (lambda (food)
+    (cons food
+          (cons 'cake '()))))
+
+(define last 'angelfood)
+
+(define sweet-toothL
+  (lambda (food)
+    (set! last food)
+    (cons food
+          (cons 'cake '()))))
+
+(define ingredients '())
+
+(define sweet-toothR
+  (lambda (food)
+    (set! ingredients (cons food ingredients))
+    (cons food
+          (cons 'cake '()))))
+
+(define deep
+  (lambda (n)
+    (cond
+      ((zero? n) 'pizza)
+      (else (cons (deepM (sub1 n)) '())))))
+
+(define deepRRRR
+  (let ((Ns '()) (Rs '()))
+    (lambda (n)
+      (set! Ns (cons n Ns))
+      (set! Rs (cons (cond
+        ((zero? n) 'pizza)
+        (else (cons (deepR (sub1 n)) '()))) Rs))
+      Rs)))
+
+(define deepR
+  (let ((Ns '()) (Rs '()))
+    (lambda (n)
+      (let ((result (deep n)))
+        (set! Ns (cons n Ns))
+        (set! Rs (cons result Rs))
+        result))))
+
+(define find
+  (lambda (n Ns Rs)
+    (cond
+      ((null? Ns) #f)
+      ((eq? n (car Ns)) (car Rs))
+      (else (find n (cdr Ns) (cdr Rs))))))
+
+(define deepM
+  (let ((Ns '()) (Rs '()))
+    (lambda (n)
+      (let ((exists (find n Ns Rs)))
+        (if (false? exists)
+          (let ((result (deep n)))
+            (set! Ns (cons n Ns))
+            (set! Rs (cons result Rs))
+            result)
+          exists)))))
+
