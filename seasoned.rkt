@@ -261,10 +261,7 @@
 
 ;;;
 (define x 'skins)
-(define gourmet
-  (lambda (food)
-    (cons food
-          (cons x '()))))
+(define gourmet (lambda (food) (cons food (cons x '()))))
 
 (gourmet 'onion)
 (set! x 'rings)
@@ -273,44 +270,40 @@
 (define gourmand
   (lambda (food)
     (set! x food)
-    (cons food
-          (cons x '()))))
+    (cons food (cons x '()))))
 
 (define dinerR
   (lambda (food)
     (set! x food)
-    (cons 'milkshake
-          (cons food '()))))
+    (cons 'milkshake (cons food '()))))
 
 (define omnivore
-  (let ((x 'minestrone))
+  (let ([x 'minestrone])
     (lambda (food)
       (set! x food)
-      (cons food
-            (cons x '())))))
+      (cons food (cons x '())))))
 
 (define gobbler
-  (let ((x 'minestrone))
+  (let ([x 'minestrone])
     (lambda (food)
       (set! x food)
-      (cons food
-            (cons x '())))))
+      (cons food (cons x '())))))
 
 (define counter
-  (let ((x 0))
+  (let ([x 0])
     (lambda ()
       (set! x (+ 1 x))
       x)))
 
 (define notcounter
   (lambda ()
-    (let ((x 0))
+    (let ([x 0])
       (set! x (+ 1 x))
       x)))
 
 (define chez-nous
   (lambda (food)
-    (let ((z food))
+    (let ([z food])
       (set! food x)
       (set! x z))))
 
@@ -318,9 +311,9 @@
 
 (define qq 0)
 (define cntr
-    (lambda ()
-      (set! qq (+ 1 qq))
-      qq))
+  (lambda ()
+    (set! qq (+ 1 qq))
+    qq))
 
 (define argtest
   (lambda (x)
@@ -328,74 +321,64 @@
     x))
 
 (define xy ; (x + yi) * (a + bi)
-  (let ((x 1) (y 0))
+  (let ([x 1] [y 0])
     (lambda (a b)
-        (set! x (- (* x a) (* y b)))
-        (set! y (+ (* y a) (* x b)))
-        `(,x ,y))))
+      (set! x (- (* x a) (* y b)))
+      (set! y (+ (* y a) (* x b)))
+      `(,x ,y))))
 
 (define iterator
   (lambda (f init)
-    (let ((x init))
+    (let ([x init])
       (lambda ()
         (set! x (f x))
         x))))
 
 (define it
   (lambda (f x n)
-    (cond ((= n 0) '())
-          (else (cons (f x) (it f (f x) (- n 1)))))))
+    (cond
+      [(= n 0) '()]
+      [else (cons (f x) (it f (f x) (- n 1)))])))
 
-(define unpair
-  (lambda (f)
-    (lambda (z)
-      (f (car z) (cadr z)))))
+(define unpair (lambda (f) (lambda (z) (f (car z) (cadr z)))))
 
 ; z -> z^2 + c
 
 (define c* ; (x + yi) * (a + bi)
   (lambda (z1 z2)
-    (let ((x (car  z1))
-          (y (cadr z1))
-          (a (car  z2))
-          (b (cadr z2)))
+    (let ([x (car z1)] [y (cadr z1)] [a (car z2)] [b (cadr z2)])
       (list (- (* x a) (* y b)) (+ (* y a) (* x b))))))
 
 (define c+ ; (x + yi) + (a + bi)
   (lambda (z1 z2)
-    (let ((x (car  z1))
-          (y (cadr z1))
-          (a (car  z2))
-          (b (cadr z2)))
+    (let ([x (car z1)] [y (cadr z1)] [a (car z2)] [b (cadr z2)])
       (list (+ x a) (+ y b)))))
 
 (define range
   (lambda (start end step)
     (letrec ([R (lambda (x)
-                  (cond ((> x end) '())
-                        (else (cons x (R (+ x step))))))])
+                  (cond
+                    [(> x end) '()]
+                    [else (cons x (R (+ x step)))]))])
       (R start))))
 
 (define mandelbrot ; does it get larger than 2?
   (lambda (c)
-    (letrec ([R (lambda (z n)
-                  (letrec ((z2 (c* z z))
-                           (zc (c+ z2 c))
-                           (x (car  zc))
-                           (y (cadr zc)))
-                    (cond
-                      [(> (abs x) 2) 7]
-                      [(> (abs y) 2) 1]
-                      [(eq? n 0) 0]
-                      [else (R zc (- n 1))])))])
-         (R '(0 0) 100))))
-
+    (letrec
+        ([R (lambda (z n)
+              (letrec ([z2 (c* z z)] [zc (c+ z2 c)] [x (car zc)] [y (cadr zc)])
+                (cond
+                  [(> (abs x) 2) 7]
+                  [(> (abs y) 2) 1]
+                  [(eq? n 0) 0]
+                  [else (R zc (- n 1))])))])
+      (R '(0 0) 100))))
 
 
 (define plot
   (lambda (f xs ys)
     (map (lambda (y) (map f (map (lambda (x) (list x y)) xs))) ys)))
-                  
+
 ; (plot mandelbrot (range -1 1 0.2) (range -1 1 0.2))
 ; (plot mandelbrot (range -1.5 0.5 0.05) (range -1 1 0.05))
 
@@ -403,46 +386,43 @@
 
 ;; Chapter 16
 
-(define sweet-tooth
-  (lambda (food)
-    (cons food
-          (cons 'cake '()))))
+(define sweet-tooth (lambda (food) (cons food (cons 'cake '()))))
 
 (define last 'angelfood)
 
 (define sweet-toothL
   (lambda (food)
     (set! last food)
-    (cons food
-          (cons 'cake '()))))
+    (cons food (cons 'cake '()))))
 
 (define ingredients '())
 
 (define sweet-toothR
   (lambda (food)
     (set! ingredients (cons food ingredients))
-    (cons food
-          (cons 'cake '()))))
+    (cons food (cons 'cake '()))))
 
 (define deep
   (lambda (n)
     (cond
-      ((zero? n) 'pizza)
-      (else (cons (deepM (sub1 n)) '())))))
+      [(zero? n) 'pizza]
+      [else (cons (deepM (sub1 n)) '())])))
 
 (define deepRRRR
-  (let ((Ns '()) (Rs '()))
+  (let ([Ns '()] [Rs '()])
     (lambda (n)
       (set! Ns (cons n Ns))
-      (set! Rs (cons (cond
-        ((zero? n) 'pizza)
-        (else (cons (deepR (sub1 n)) '()))) Rs))
+      (set! Rs
+            (cons (cond
+                    [(zero? n) 'pizza]
+                    [else (cons (deepR (sub1 n)) '())])
+                  Rs))
       Rs)))
 
 (define deepR
-  (let ((Ns '()) (Rs '()))
+  (let ([Ns '()] [Rs '()])
     (lambda (n)
-      (let ((result (deep n)))
+      (let ([result (deep n)])
         (set! Ns (cons n Ns))
         (set! Rs (cons result Rs))
         result))))
@@ -450,18 +430,77 @@
 (define find
   (lambda (n Ns Rs)
     (cond
-      ((null? Ns) #f)
-      ((eq? n (car Ns)) (car Rs))
-      (else (find n (cdr Ns) (cdr Rs))))))
+      [(null? Ns) #f]
+      [(eq? n (car Ns)) (car Rs)]
+      [else (find n (cdr Ns) (cdr Rs))])))
 
 (define deepM
-  (let ((Ns '()) (Rs '()))
+  (let ([Ns '()] [Rs '()])
     (lambda (n)
-      (let ((exists (find n Ns Rs)))
+      (let ([exists (find n Ns Rs)])
         (if (false? exists)
-          (let ((result (deep n)))
-            (set! Ns (cons n Ns))
-            (set! Rs (cons result Rs))
-            result)
-          exists)))))
+            (let ([result (deep n)])
+              (set! Ns (cons n Ns))
+              (set! Rs (cons result Rs))
+              result)
+            exists)))))
 
+; (define length (lambda (lat) (if (null? lat) 0 (add1 (length (cdr lat))))))
+
+
+(define L
+  (lambda (length)
+    (lambda (l)
+      (cond
+        [(null? l) 0]
+        [else (add1 (length (cdr l)))]))))
+
+(define Y!
+  (lambda (L)
+    (let ([h (lambda (l) 'banana)])
+      (set! h (L (lambda (arg) (h arg))))
+      h)))
+
+(define length (Y! L))
+
+(length '(1 2 5 6 8 3)) ; 6
+
+; (define collatz
+;   (let ([x1 0] [x2 0])
+;     (let ([y1 (lambda (n)
+;                 (display n)
+;                 (display " ")
+;                 (cond
+;                   [(equal? n 1) 1]
+;                   [(zero? (modulo n 2)) (x1 (/ n 2))]
+;                   [else (x2 n)]))]
+;           [y2 (lambda (n)
+;                 (cond
+;                   [(equal? n 1) 1]
+;                   [(zero? (modulo n 2)) (x1 n)]
+;                   [else (x2 (+ 1 (* 3 n)))]))])
+;       (set! x1 y1)
+;       (set! x2 y2))
+;     x1))
+
+(define collatz
+  (let ([x1 0] [x2 0])
+    (set! x1
+          (lambda (n)
+            (display n)
+            (display " ")
+            (cond
+              [(equal? n 1) 1]
+              [(zero? (modulo n 2)) (x1 (/ n 2))]
+              [else (x2 n)])))
+    (set! x2
+          (lambda (n)
+            (cond
+              [(equal? n 1) 1]
+              [(zero? (modulo n 2)) (x1 n)]
+              [else (x2 (+ 1 (* 3 n)))])))
+    x1))
+
+(collatz 14)
+
+; end of book page 123 (not pdf)
