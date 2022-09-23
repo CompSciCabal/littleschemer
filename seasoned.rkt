@@ -504,3 +504,33 @@
 (collatz 14)
 
 ; end of book page 123 (not pdf)
+
+(define depthstar
+  (lambda (l)
+    (cond
+      ((null? l) 0)
+      ((atom? (car l)) (max 1 (depthstar (cdr l))))
+      (else (max (depthstar (cdr l)) (+ 1 (depthstar (car l))))))))
+
+(define D
+  (lambda (depth*)
+    (lambda (l)
+      (cond
+        ((null? l) 1)
+        ((atom? (car l)) (depth* (cdr l)))
+        (else (max (depth* (cdr l)) (+ 1 (depth* (car l)))))))))
+
+(define Y-bang
+  (lambda (L)
+    (letrec ((h (L (lambda (arg) (h arg))))) h)))
+
+(define biz
+  (let ((x 0))
+    (lambda (f)
+      (set! x (add1 x))
+      (lambda (a)
+        (if (= a x)
+            0
+            (f a))))))
+
+; Chapter 17
