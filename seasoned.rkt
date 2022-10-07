@@ -406,7 +406,7 @@
   (lambda (n)
     (cond
       [(zero? n) 'pizza]
-      [else (cons (deepM (sub1 n)) '())])))
+      [else (consC (deep (sub1 n)) '())])))
 
 (define deepRRRR
   (let ([Ns '()] [Rs '()])
@@ -434,16 +434,16 @@
       [(eq? n (car Ns)) (car Rs)]
       [else (find n (cdr Ns) (cdr Rs))])))
 
-(define deepM
-  (let ([Ns '()] [Rs '()])
-    (lambda (n)
-      (let ([exists (find n Ns Rs)])
-        (if (false? exists)
-            (let ([result (deep n)])
-              (set! Ns (cons n Ns))
-              (set! Rs (cons result Rs))
-              result)
-            exists)))))
+; (define deepM
+;   (let ([Ns '()] [Rs '()])
+;     (lambda (n)
+;       (let ([exists (find n Ns Rs)])
+;         (if (false? exists)
+;             (let ([result (deep n)])
+;               (set! Ns (cons n Ns))
+;               (set! Rs (cons result Rs))
+;               result)
+;             exists)))))
 
 ; (define length (lambda (lat) (if (null? lat) 0 (add1 (length (cdr lat))))))
 
@@ -508,29 +508,74 @@
 (define depthstar
   (lambda (l)
     (cond
-      ((null? l) 0)
-      ((atom? (car l)) (max 1 (depthstar (cdr l))))
-      (else (max (depthstar (cdr l)) (+ 1 (depthstar (car l))))))))
+      [(null? l) 0]
+      [(atom? (car l)) (max 1 (depthstar (cdr l)))]
+      [else (max (depthstar (cdr l)) (+ 1 (depthstar (car l))))])))
 
 (define D
   (lambda (depth*)
     (lambda (l)
       (cond
-        ((null? l) 1)
-        ((atom? (car l)) (depth* (cdr l)))
-        (else (max (depth* (cdr l)) (+ 1 (depth* (car l)))))))))
+        [(null? l) 1]
+        [(atom? (car l)) (depth* (cdr l))]
+        [else (max (depth* (cdr l)) (+ 1 (depth* (car l))))]))))
 
-(define Y-bang
-  (lambda (L)
-    (letrec ((h (L (lambda (arg) (h arg))))) h)))
+(define Y-bang (lambda (L) (letrec ([h (L (lambda (arg) (h arg)))]) h)))
 
 (define biz
-  (let ((x 0))
+  (let ([x 0])
     (lambda (f)
       (set! x (add1 x))
-      (lambda (a)
-        (if (= a x)
-            0
-            (f a))))))
+      (lambda (a) (if (= a x) 0 (f a))))))
+
+
+(define cc (lambda (n) (call-with-current-continuation (lambda (jump) jump))))
+(define x (cc 5))
+(x 7)
+(define y (cc 5))
+(y y)
+((y y) (y y))
+(y print)
+(y print)
 
 ; Chapter 17
+
+(deep 99) ;
+
+(define counter)
+
+(define consC
+  (let ([N 0])
+    (set! counter (lambda () N))
+    (lambda (x y)
+      (set! N (add1 N))
+      (cons x y))))
+
+(define supercounter
+  (lambda (f)
+    (letrec ([S (lambda (n)
+                  (if (zero? n)
+                      (f n)
+                      (let ()
+                        (f n)
+                        (S (sub1 n)))))])
+      (S 1000)
+      (counter))))
+
+(define deepM
+  (let ([Rs (quote ())] [Ns (quote ())])
+    (lambda (n)
+      (let ([exists (find n Ns Rs)])
+        (if (atom? exists)
+            (let ([result (if (zero? n)
+                              (quote pizza)
+                              (consC (deepM (sub1 n)) (quote ())))])
+              (set! Rs (cons result Rs))
+              (set! Ns (cons n Ns))
+              result)
+            exists)))))
+
+(supercounter deepM)
+
+
+; page 139
