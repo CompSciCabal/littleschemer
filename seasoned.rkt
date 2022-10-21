@@ -406,7 +406,7 @@
   (lambda (n)
     (cond
       [(zero? n) 'pizza]
-      [else (consC (deep (sub1 n)) '())])))
+      [else (cons (deep (sub1 n)) '())])))
 
 (define deepRRRR
   (let ([Ns '()] [Rs '()])
@@ -529,24 +529,26 @@
       (lambda (a) (if (= a x) 0 (f a))))))
 
 
-(define cc (lambda (n) (call-with-current-continuation (lambda (jump) jump))))
-(define x (cc 5))
-(x 7)
-(define y (cc 5))
-(y y)
-((y y) (y y))
-(y print)
-(y print)
+;(define cc (lambda (n) (call-with-current-continuation (lambda (jump) jump))))
+;(define x (cc 5))
+;(x 7)
+;(define y (cc 5))
+;(y y)
+;((y y) (y y))
+;(y print)
+;(y print)
 
 ; Chapter 17
 
 (deep 99) ;
 
-(define counter)
+(define xcounter 0)
+(define set-counter 0)
 
 (define consC
   (let ([N 0])
-    (set! counter (lambda () N))
+    (set! xcounter (lambda () N))
+    (set! set-counter (lambda (x) (set! N x)))
     (lambda (x y)
       (set! N (add1 N))
       (cons x y))))
@@ -560,7 +562,7 @@
                         (f n)
                         (S (sub1 n)))))])
       (S 1000)
-      (counter))))
+      (xcounter))))
 
 (define deepM
   (let ([Rs (quote ())] [Ns (quote ())])
@@ -579,3 +581,116 @@
 
 
 ; page 139
+
+(define rember1*C
+  (lambda (a l)
+    (letrec
+        ((R (lambda (l oh)
+              (cond ((null? l) (oh (quote no)))
+                    ((atom? (car l))
+                     (if (eq? (car l) a)
+                         (cdr l)
+                         (consC (car l)
+                               (R (cdr l) oh))))
+                    (else
+                     (let ((new-car
+                            (call-with-current-continuation
+                             (lambda (oh)
+                              (R (car l)
+                                 oh)))))
+                       (if (atom? new-car)
+                          (consC (car l)
+                                (R (cdr l) oh))
+                          (consC new-car
+                                (cdr l)))))))))
+      (let ((new-l (call-with-current-continuation
+                     (lambda (oh) (R l oh)))))
+        (if(atom? new-l)
+           l
+           new-l)))))
+
+(define eqlist?
+  (lambda (a b)
+    (cond
+      ((null? a) (null? b))
+      ((null? b) #f)
+      ((atom? (car a))
+       (if (eq? (car a) (car b))
+           (eqlist? (cdr a) (cdr b))
+           #f))
+      ((atom? (car b)) #f)
+      (else
+       (and (eqlist? (car a) (car b))
+            (eqlist? (cdr a) (cdr b)))))))
+
+(define rember1*C2
+  (lambda (a l)
+    (letrec
+        ((R (lambda (l)
+              (cond
+                ((null? l) (quote ()))
+                ((atom? (car l))
+                 (if (eq? (car l) a)
+                     (cdr l)
+                     (consC (car l)
+                            (R (cdr l)))))
+                (else
+                 (let ((av (R (car l))))
+                   (if (eqlist? (car l) av)
+                       (consC (car l) (R (cdr l)))
+                       (consC av
+                              (cdr l)))))))))
+      (R l))))
+
+; (consC (consC 'food '()) (consC 'more (consC (consC 'food '()) '())))
+
+(define add-at-end
+  (lambda (l)
+    (cond
+      ((null? l) '(egg))
+      (else (cons (car l) (add-at-end (cdr l)))))))
+
+;(define add-at-end-too
+;  (lambda (l)
+;    (letrec
+;        ((A (lambda (ls)
+;              (cond
+;                ((null? (kdr ls))
+;                 (set-kdr ls '(egg))))
+;                (else (A (kdr ls)))))))
+;      (A l)
+;      l)))
+
+;(define kons
+;  (lambda (kar kdr)
+;    (lambda (selector)
+;      (selector kar kdr))))
+
+(define kar
+  (lambda (c)
+    (c (lambda (a d) a))))
+
+(define kdr
+  (lambda (c)
+    (c (lambda (a d) d))))
+
+(define set-kdr
+  (lambda (c x)
+    ((c (lambda (s a d) s )) x)))
+
+(define bons
+  (lambda (kar)
+    (let ((kdr '()))
+      (lambda (selector)
+        (selector
+         (lambda (x) (set! kdr x))
+         kar
+         kdr)))))
+
+(define kons
+  (lambda (a d)
+    (let ((c (bons a)))
+      (set-kdr c d)
+      c)))
+
+; page 147
