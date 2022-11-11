@@ -694,3 +694,34 @@
       c)))
 
 ; page 147
+
+
+(define kar2
+  (lambda (c)
+    (c (lambda (s a d) a))))
+
+(define kdr2
+  (lambda (c)
+    (c (lambda (s a d) d))))
+
+(define lots
+  (lambda (m)
+    (cond
+      ((zero? m) '())
+      (else (kons 'egg (lots (sub1 m)))))))
+
+(define x (lots 4))
+
+(define y (kons 'foo (kons 'bar '())))
+
+(define to-list
+  (lambda (k)
+    (cond
+     ((null? k) '())
+     (else (cons (kar2 k) (to-list (kdr2 k)))))))
+
+(define koncat!
+  (lambda [c1 c2]
+    (cond
+      ((null? (kdr2 c1)) (set-kdr c1 c2))
+      (else (koncat! (kdr2 c1) c2)))))
