@@ -710,9 +710,8 @@
       ((zero? m) '())
       (else (kons 'egg (lots (sub1 m)))))))
 
-(define x (lots 4))
-
-(define y (kons 'foo (kons 'bar '())))
+; (define x (lots 4))
+; (define y (kons 'foo (kons 'bar '())))
 
 (define to-list
   (lambda (k)
@@ -725,3 +724,18 @@
     (cond
       ((null? (kdr2 c1)) (set-kdr c1 c2))
       (else (koncat! (kdr2 c1) c2)))))
+
+; Chapter 19
+
+(define toppings 0)
+
+(define deepB
+  (lambda (m)
+    (cond ((zero? m)
+           (call-with-current-continuation
+            (lambda (jump)
+             (set! toppings jump)
+              'pizza)))
+          (else (cons (deepB (sub1 m))
+                      '())))))
+; page 160
