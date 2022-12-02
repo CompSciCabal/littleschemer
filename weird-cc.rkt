@@ -1,16 +1,12 @@
 #lang racket
 
-(define cc
-  (lambda (n)
-    (call-with-current-continuation
-     (lambda (jump)
-       jump))))
+(define cc (lambda (n) (call-with-current-continuation (lambda (jump) jump))))
 
 (define counter
-    (let ((n 0))
-      (lambda (m)
-        (set! n (+ n m))
-        n)))
+  (let ([n 0])
+    (lambda (m)
+      (set! n (+ n m))
+      n)))
 
 ; (define e (call-with-current-continuation
 ;      (lambda (jump)
