@@ -732,7 +732,8 @@
          (k 'pizza))]
       [else (deep&coB (sub1 m) (lambda (x) (k (cons x empty))))])))
 
-(define fill)
+(define fill 0)
+(define leave 0)
 (define waddle
   (lambda (l)
     (cond
@@ -750,8 +751,124 @@
 
 (define start-it2
   (lambda (l)
-    (call-with-current-continuation (lambda (here)
-                                      (set! leave here)
-                                      (waddle l)))))
+    (cons
+     (call-with-current-continuation (lambda (here)
+                                       (set! leave here)
+                                       (waddle l))) '(1))))
 
 ;page 174
+
+(define get-first
+  (lambda (l)
+    (call-with-current-continuation
+     (lambda (here)
+       (set! leave here)
+       (waddle l)
+       (leave '())))))
+
+(define get-next
+  (lambda (x)
+    (call-with-current-continuation
+     (lambda (here)
+       (set! leave here)
+       (fill)))))
+
+(define lookup
+  (lambda (table name)
+    (table name)))
+
+(define the-empty-table
+  (lambda (name)
+    (car '())))
+
+(define extend
+  (lambda (name1 value table)
+    (lambda (name2)
+      (cond
+        ((eq? name2 name1) value)
+        (else (table name2))))))
+
+(define define?
+  (lambda (e)
+    (cond
+      ((atom? e) #f)
+      ((atom? (car e))
+       (eq? (car e) 'define))
+      (else #f))))
+
+(define global-table the-empty-table)
+
+(define box
+  (lambda (it)
+    (lambda (sel)
+      (sel it (lambda (new)
+                (set! it new))))))
+
+(define setbox
+  (lambda (box new)
+    (box (lambda (it set) (set new)))))
+
+(define unbox
+  (lambda (box)
+    (box (lambda (it set) it))))
+
+(define lookup-in-global-table
+  (lambda (name)
+    (lookup global-table name)))
+
+(define *quote
+  (lambda (e table)
+    (text-of e)))
+
+(define *identifier
+  (lambda (e table)
+    (unbox (lookup table e))))
+
+(define *set
+  (lambda (e table)
+    (setbox
+     (lookup table (name-of e))
+     (meaning (right-side-of e) table))))
+
+(define *lambda
+  (lambda (e table)
+    (lambda (args)
+      (beglis (body-of e)
+              (multi-extend
+               (formals-of e)
+               (box-all args)
+               table)))))
+
+(define expression-to-action
+  (lambda (e)
+    (cond
+      ((define? e) (lambda (e table) 1)))))
+
+(define meaning
+  (lambda (e table)
+    ((expression-to-action e)
+     e table)))
+
+(define the-meaning
+  (lambda (e)
+    (meaning e lookup-in-global-table)))
+
+(define *define
+  (lambda (e)
+    (set! global-table
+          (extend
+           (name-of e)
+           (box
+            (the-meaning
+             (right-side-of e)))
+           global-table))))
+
+(define value
+  (lambda (e)
+    (cond
+      ((define? e) (*define e))
+      (else (the-meaning e))) ))
+
+
+
+; 185
