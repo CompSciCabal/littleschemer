@@ -779,7 +779,7 @@
 
 (define the-empty-table
   (lambda (name)
-    (car '())))
+    (abort (cons 'no-answer (cons name '())))))
 
 (define extend
   (lambda (name1 value table)
@@ -839,7 +839,7 @@
                (box-all args)
                table)))))
 
-(define expression-to-action
+(define expression-to-actionn
   (lambda (e)
     (cond
       ((define? e) (lambda (e table) 1)))))
@@ -865,10 +865,277 @@
 
 (define value
   (lambda (e)
-    (cond
-      ((define? e) (*define e))
-      (else (the-meaning e))) ))
+    (call-with-current-continuation
+     (lambda (the-end)
+       (set! abort the-end)
+       (cond
+         ((define? e) (*define e))
+         (else (the-meaning e)))))))
 
-
+(define abort 0)
 
 ; 185
+
+(define beglis
+  (lambda (es table)
+    (cond
+      ((null? (cdr es))
+       (meaning (car es) table))
+      (else ((lambda (val)
+               (beglis (cdr es) table))
+             (meaning (car es) table))))))
+
+(define box-all
+  (lambda (vals)
+    (cond
+      ((null? vals) '())
+      (else (cond (box (car vals)) (box-all (cdr vals)))))))
+
+(define multi-extend
+  (lambda (names vals table)
+    (cond
+      ((null? names) table)
+      ((null? vals)  table)
+      (else (extend (car names) (car vals)
+                    (multi-extend (cdr names) (cdr vals) table))))))
+
+(define odd?
+  (lambda (n)
+    (cond
+      ((eq? n 0) #f)
+      ((eq? n 1) #t)
+      (else (odd? (- n 2))))))
+
+(define even?
+  (lambda (n)
+    (cond
+      ((eq? n 0) #t)
+      ((eq? n 1) #f)
+      (else (even? (- n 2))))))
+
+(define odd??
+  (lambda (n)
+    (cond
+      ((eq? n 1) #t)
+      ((eq? n 0) #f)
+      (else (not (even?? (- n 1)))))))
+
+(define even??
+  (lambda (n)
+    (cond
+      ((eq? n 0) #t)
+      (else (not (odd?? (- n 1)))))))
+
+(define odd???
+  (lambda (n)
+    (cond
+      ((eq? n 0) #f)
+      (else (even??? (- n 1))))))
+
+(define even???
+  (lambda (n)
+    (cond
+      ((eq? n 0) #t)
+      (else (odd??? (- n 1))))))
+
+(define *application
+  (lambda (e table)
+    ((meaning (function-of e) table)
+     (evlis (arguments-of e) table))))
+
+(define evlis
+  (lambda (args table)
+    (cond
+      ((null? args) '())
+      (else
+       ((lambda (val)
+          (cons val
+                (evlis (cdr args) table)))
+        (meaning (car args) table))))))
+
+(define :car
+  (lambda (args)
+    (car (car args))))
+
+(define a-prim
+  (lambda (f)
+    (lambda (args)
+      (f (car args)))))
+
+(define b-prim
+  (lambda (f)
+    (lambda (args)
+      (f (car args) (cadr args)))))
+
+(define *const
+  (lambda (e table)
+    (cond
+      ((number? e) e)
+      ((eq? e #t) #t)
+      ((eq? e #f) #f)
+      ((eq? e (quote cons)) (b-prim cons))
+      ((eq? e (quote car)) (a-prim car))
+      ((eq? e (quote cdr)) (a-prim cdr))
+      ((eq? e (quote eq?)) (b-prim eq?))
+      ((eq? e (quote atom?)) (a-prim atom?))
+      ((eq? e (quote null?)) (a-prim null?))
+      ((eq? e (quote zero?)) (a-prim zero?))
+      ((eq? e (quote add1)) (a-prim add1))
+      ((eq? e (quote sub1)) (a-prim sub1))
+      ((eq? e (quote number?)) (a-prim number?)))))
+
+(define *cond
+  (lambda (e table)
+    (evcon (cond-lines-of e) table)))
+
+(define evcon
+  (lambda (lines table)
+    (cond
+      ((else? (question-of (car lines)))
+       (meaning (answer-of (car lines)) table))
+      ((meaning (question-of (car lines)) table)
+       (meaning (answer-of (car lines)) table))
+      (else (evcon (cdr lines) table)))))
+
+(define *letcc
+  (lambda (e table)
+    (call-with-current-continuation
+     (lambda (skip)
+       (beglis (ccbody-of e)
+               (extend
+                (name-of e)
+                (box (a-prim skip))
+                table))))))
+
+(define list-to-action
+  (lambda (e)
+    (cond
+      ((atom? (car e))
+       (cond
+         ((eq? (car e) 'quote)
+          *quote)
+         ((eq? (car e) 'lambda)
+          *lambda)
+         ((eq? (car e) 'letcc)
+          *letcc)
+         ((eq? (car e) 'set!)
+          *set)
+         ((eq? (car e) 'cond)
+          *cond)
+         (else *application)))
+      (else *application))))
+
+(define expression-to-action
+  (lambda (e)
+    (cond
+      ((atom? e) (atom-to-action e))
+      (else (list-to-action e)))))
+
+(define atom-to-action
+  (lambda (e)
+    (cond
+      ((number? e) *const)
+      ((eq? e #t) *const)
+      ((eq? e #f) *const)
+      ((eq? e (quote cons)) *const)
+      ((eq? e (quote car)) *const)
+      ((eq? e (quote cdr)) *const)
+      ((eq? e (quote null?)) *const)
+      ((eq? e (quote eq?)) *const)
+      ((eq? e (quote atom?)) *const)
+      ((eq? e (quote zero?)) *const)
+      ((eq? e (quote add1)) *const)
+      ((eq? e (quote sub1)) *const)
+      ((eq? e (quote number?)) *const)
+      (else *identifier))))
+
+;; text-of: list ->
+;; Page 200
+(define text-of
+  (lambda (x)
+    (car (cdr x))))
+
+;; formals-of: list ->
+;; Page 200
+(define formals-of
+  (lambda (x)
+    (car (cdr x))))
+
+;; body-of: list ->
+;; Page 200
+(define body-of
+  (lambda (x)
+    (cdr (cdr x))))
+
+;; ccbody-of: list ->
+;; Page 200
+(define ccbody-of
+  (lambda (x)
+    (cdr (cdr x))))
+
+;; name-of: list ->
+;; Page 200
+(define name-of
+  (lambda (x)
+    (car (cdr x))))
+
+;; right-side-of: list ->
+;; Page 200
+(define right-side-of
+  (lambda (x)
+    (cond
+     ((null? (cdr (cdr x))) 0)
+     (else (car (cdr (cdr x)))))))
+
+;; cond-lines-of: list ->
+;; Page 200
+(define cond-lines-of
+  (lambda (x)
+    (cdr x)))
+
+;; else?: [s-exp] -> boolean
+;; Page 200
+(define else?
+  (lambda (x)
+    (cond
+     ((atom? x) (eq? x 'else))
+     (else #f))))
+
+;; question-of: list -> [s-exp]
+;; Page 200
+(define question-of
+  (lambda (x)
+    (car x)))
+
+;; answer-of: list -> [s-exp]
+;; Page 200
+(define answer-of
+  (lambda (x)
+    (car (cdr x))))
+
+;; function-of: list -> [s-exp]}
+;; Page 200
+(define function-of
+  (lambda (x)
+    (car x)))
+
+;; arguments-of: list -> [s-exp]
+(define arguments-of
+  (lambda (x)
+    (cdr x)))
+
+;; TODO: Write more tests;
+;(test "evlis" (evlis (cons 2 (quote (3))) global-table) '(2 3))
+;(test "value" (value 1) 1)
+;(test "value" (value (add1 2)) 3)
+;(test "value" (value ((lambda (x) (add1 x)) 10)) 11)
+;(test "value" (value ((lambda (x) (add1 x)) 10)) 11)
+;(test "value" (value (car (quote (1 2)))) 1)
+;(test "value" (value (eq? (quote a) (quote a))) #t)
+
+; above copied from some random website, maybe fix later?
+
+(value '(define value
+(lambda (e) (letcc the-end
+(set! abort the-end) (cond
+((define? e) (^define e)) (else (the-meaning e)))))))
